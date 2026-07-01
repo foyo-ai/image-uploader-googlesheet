@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; margin: 8px; color: #202124; }
+    h3 { margin: 4px 0 8px; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input[type=text], select { width: 100%; box-sizing: border-box; padding: 5px; margin-top: 4px; }
+    input[type=file] { margin-top: 4px; }
+    button { padding: 7px 14px; margin-top: 10px; cursor: pointer; border: 0;
+             background: #4285f4; color: #fff; border-radius: 4px; font-size: 13px; }
+    button:disabled { background: #bbb; cursor: not-allowed; }
+    .pick { background: #fff; color: #1a73e8; border: 1px solid #dadce0; margin-right: 6px; }
+    .pick:hover { background: #f1f3f4; }
+    #bar { height: 14px; background: #eee; border-radius: 7px; overflow: hidden; margin-top: 10px; display: none; }
+    #barFill { height: 100%; width: 0; background: #34a853; transition: width .2s; }
+    #log { margin-top: 10px; max-height: 240px; overflow: auto; font-size: 12px; line-height: 1.5; }
+    #log div { padding: 1px 0; word-break: break-word; }
+    .ok { color: #188038; }
+    .err { color: #d93025; }
+    .muted { color: #666; }
+    .note { background: #fef7e0; border: 1px solid #fdd663; border-radius: 4px;
+            padding: 6px 8px; margin-top: 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <label id="lblStep1">1. Choose images</label>
+  <input type="file" id="pickerFolder" webkitdirectory directory multiple style="display:none" />
+  <input type="file" id="pickerFiles" accept="image/*" multiple style="display:none" />
+  <div>
+    <button type="button" class="pick" id="btnFolder"
+            onclick="document.getElementById('pickerFolder').click()">📁 Choose folder</button>
+    <button type="button" class="pick" id="btnFiles"
+            onclick="document.getElementById('pickerFiles').click()">🖼️ Choose files</button>
+  </div>
+  <div id="count" class="muted"></div>
+
+  <label id="lblStep2">2. Drive folder name</label>
+  <input type="text" id="folderName" placeholder="Folder name..." />
+
+  <button id="btn" disabled onclick="startUpload()">🚀 Upload</button>
+
+  <div id="bar"><div id="barFill"></div></div>
+  <div id="log"></div>
+
+  <div class="note" id="note"></div>
+
+  <script>
+    // Được nạp từ server (Code.gs -> showSidebar).
+    const I18N = <?!= JSON.stringify(i18n) ?>;
+    let LANG = <?!= JSON.stringify(defaultLang) ?>;
+    let T = I18N[LANG] || I18N.en;
+
+    let files = [];
+    let totalPicked = 0;
+    let folderNameAuto = false; // tên folder đang là tự-điền hay do người dùng gõ
+
+    // Thay {key} trong chuỗi bằng giá trị tương ứng.
+    function fmt(s, o) {
+      return String(s).replace(/\{(\w+)\}/g, function (_, k) {
+        return (o && k in o) ? o[k] : '';
+      });
+    }
+
+    // Áp dụng ngôn ngữ cho toàn bộ chữ tĩnh.
+    function applyLang() {
+      T = I18N[LANG] || I18N.en;
+      document.getElementById('lblStep1').textContent = T.step1;
+      document.getElementById('btnFolder').textContent = T.pickFolder;
+      document.getElementById('btnFiles').textContent = T.pickFiles;
+      document.getElementById('lblStep2').textContent = T.step2;
+      document.getElementById('folderName').placeholder = T.folderPlaceholder;
+      document.getElementById('btn').textContent = T.uploadBtn;
+      document.getElementById('note').innerHTML = T.note;
+      updateCount();
+    }
+
+    function updateCount() {
+      const el = document.getElementById('count');
+      el.textContent = files.length
+        ? fmt(T.count, { n: files.length, m: totalPicked - files.length })
+        : '';
+    }
+
+    // Dùng chung cho cả 2 kiểu chọn: thư mục hoặc từng file.
+    function handlePicked(all, fromFolder) {
+      totalPicked = all.length;
+      files = all.filter(f => f.type && f.type.indexOf('image/') === 0);
+      updateCount();
+
+      const nameEl = document.getElementById('folderName');
+      if (fromFolder && all.length && all[0].webkitRelativePath) {
+        // Chọn thư mục -> tự điền tên folder theo thư mục gốc.
+        const top = all[0].webkitRelativePath.split('/')[0];
+        if (top) { nameEl.value = top; folderNameAuto = true; }
+      } else if (!fromFolder && folderNameAuto) {
+        // Chọn từng file mà tên đang là tự-điền của lần trước -> xoá để khỏi dính.
+        nameEl.value = '';
+        folderNameAuto = false;
+      }
+      document.getElementById('btn').disabled = files.length === 0;
+    }
+
+    // Reset .value sau khi chọn để lần sau chọn lại đúng thư mục/ảnh đó vẫn kích hoạt.
+    document.getElementById('pickerFolder').addEventListener('change', function (e) {
+      handlePicked(Array.from(e.target.files), true);
+      e.target.value = '';
+    });
+    document.getElementById('pickerFiles').addEventListener('change', function (e) {
+      handlePicked(Array.from(e.target.files), false);
+      e.target.value = '';
+    });
+
+    // Người dùng tự gõ tên -> không còn coi là tự-điền.
+    document.getElementById('folderName').addEventListener('input', function () {
+      folderNameAuto = false;
+    });
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      document.getElementById('log').appendChild(d);
+      d.scrollIntoView();
+    }
+
+    function setProgress(done, total) {
+      document.getElementById('barFill').style.width = (done / total * 100) + '%';
+    }
+
+    // Bọc google.script.run thành Promise để dùng async/await.
+    function call(fn, arg) {
+      return new Promise(function (resolve, reject) {
+        google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(reject)
+          [fn](arg);
+      });
+    }
+
+    // Đọc kích thước ảnh (chỉ làm được ở phía trình duyệt).
+    function readDimensions(file) {
+      return new Promise(function (resolve) {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = function () {
+          resolve({ w: img.naturalWidth, h: img.naturalHeight });
+          URL.revokeObjectURL(url);
+        };
+        img.onerror = function () {
+          resolve({ w: '', h: '' });
+          URL.revokeObjectURL(url);
+        };
+        img.src = url;
+      });
+    }
+
+    // Đọc file thành base64 (bỏ prefix "data:...;base64,").
+    function readBase64(file) {
+      return new Promise(function (resolve, reject) {
+        const r = new FileReader();
+        r.onload = function () { resolve(r.result.split(',')[1]); };
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function startUpload() {
+      document.getElementById('btn').disabled = true;
+      document.getElementById('log').innerHTML = '';
+      document.getElementById('bar').style.display = 'block';
+      document.getElementById('barFill').style.width = '0';
+      const name = document.getElementById('folderName').value.trim() || 'Upload';
+
+      let folder, sheetName;
+      try {
+        log(T.creatingFolder);
+        folder = await call('createDriveFolder', name);
+        log(fmt(T.folderOk, { name: folder.folderName }), 'ok');
+        sheetName = await call('ensureTargetSheet', LANG);
+        log(fmt(T.sheetOk, { name: sheetName }), 'ok');
+      } catch (e) {
+        log(fmt(T.initErr, { msg: (e.message || e) }), 'err');
+        document.getElementById('btn').disabled = false;
+        return;
+      }
+
+      let ok = 0, fail = 0;
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        try {
+          const dim = await readDimensions(f);
+          const b64 = await readBase64(f);
+          const res = await call('processImage', {
+            sheetName: sheetName,
+            folderId: folder.folderId,
+            name: f.name,
+            mimeType: f.type,
+            dataBase64: b64,
+            width: dim.w,
+            height: dim.h
+          });
+          ok++;
+          if (res && res.shareFailed) {
+            log(fmt(T.shareWarn, { name: f.name, msg: res.shareError }), 'err');
+          } else {
+            log(fmt(T.itemOk, { name: f.name }), 'ok');
+          }
+        } catch (e) {
+          fail++;
+          log(fmt(T.itemErr, { name: f.name, msg: (e.message || e) }), 'err');
+        }
+        setProgress(i + 1, files.length);
+      }
+
+      log(T.sep);
+      log(fmt(T.done, { ok: ok, fail: fail }), ok > 0 ? 'ok' : 'err');
+      log(fmt(T.openFolder, { url: folder.folderUrl }), 'muted');
+      document.getElementById('btn').disabled = false;
+    }
+
+    // Khởi tạo theo ngôn ngữ phát hiện được từ tài khoản người dùng.
+    applyLang();
+  </script>
+</body>
+</html>
