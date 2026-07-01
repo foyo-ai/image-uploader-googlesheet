@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="470" viewBox="0 0 320 470" font-family="Arial, Helvetica, sans-serif">
+  <rect x="0" y="0" width="320" height="470" fill="#ffffff" stroke="#dadce0"/>
+
+  <!-- Sidebar title bar -->
+  <rect x="0" y="0" width="320" height="40" fill="#f8f9fa" stroke="#dadce0"/>
+  <text x="16" y="25" font-size="14" font-weight="bold" fill="#202124">Upload images to Drive</text>
+  <text x="298" y="25" font-size="16" fill="#5f6368">×</text>
+
+  <!-- Step 1 -->
+  <text x="16" y="70" font-size="13" font-weight="bold" fill="#202124">1. Choose images</text>
+  <rect x="16" y="80" width="130" height="30" rx="4" fill="#ffffff" stroke="#dadce0"/>
+  <text x="81" y="99" font-size="12" fill="#1a73e8" text-anchor="middle">Choose folder</text>
+  <rect x="154" y="80" width="120" height="30" rx="4" fill="#ffffff" stroke="#dadce0"/>
+  <text x="214" y="99" font-size="12" fill="#1a73e8" text-anchor="middle">Choose files</text>
+  <text x="16" y="128" font-size="12" fill="#666666">8 images (0 other files skipped)</text>
+
+  <!-- Step 2 -->
+  <text x="16" y="158" font-size="13" font-weight="bold" fill="#202124">2. Drive folder name</text>
+  <rect x="16" y="168" width="288" height="30" rx="4" fill="#ffffff" stroke="#dadce0"/>
+  <text x="24" y="187" font-size="12" fill="#202124">ProductImages</text>
+
+  <!-- Upload button -->
+  <rect x="16" y="212" width="90" height="32" rx="4" fill="#4285f4"/>
+  <text x="61" y="233" font-size="13" fill="#ffffff" text-anchor="middle">Upload</text>
+
+  <!-- Progress bar -->
+  <rect x="16" y="256" width="288" height="12" rx="6" fill="#eeeeee"/>
+  <rect x="16" y="256" width="200" height="12" rx="6" fill="#34a853"/>
+
+  <!-- Log -->
+  <text x="16" y="292" font-size="12" fill="#188038">&#10003; Folder: ProductImages</text>
+  <text x="16" y="310" font-size="12" fill="#188038">&#10003; Writing to sheet: Sheet1</text>
+  <text x="16" y="328" font-size="12" fill="#188038">&#10003; product-01.jpg</text>
+  <text x="16" y="346" font-size="12" fill="#188038">&#10003; product-02.jpg</text>
+  <text x="16" y="364" font-size="12" fill="#188038">&#10003; product-03.png</text>
+  <text x="16" y="382" font-size="12" fill="#5f6368">————————————</text>
+  <text x="16" y="400" font-size="12" fill="#188038">Done: 8 succeeded, 0 failed.</text>
+
+  <!-- Note -->
+  <rect x="16" y="414" width="288" height="44" rx="4" fill="#fef7e0" stroke="#fdd663"/>
+  <text x="24" y="432" font-size="11" fill="#5f6368">Images are made public (anyone with the</text>
+  <text x="24" y="447" font-size="11" fill="#5f6368">link can view).</text>
+</svg>

@@ -1,0 +1,7 @@
+# Ignore everything by default...
+**/**
+
+# ...and only push the actual Apps Script sources.
+!appsscript.json
+!Code.gs
+!Sidebar.html

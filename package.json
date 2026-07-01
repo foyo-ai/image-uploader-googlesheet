@@ -1,0 +1,17 @@
+{
+  "name": "image-uploader-googlesheet",
+  "version": "1.0.0",
+  "description": "Google Sheets add-on: upload local images to Google Drive (public) and write metadata into the current spreadsheet.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "login": "clasp login",
+    "push": "clasp push",
+    "pull": "clasp pull",
+    "open": "clasp open",
+    "deploy": "clasp push && clasp open"
+  },
+  "devDependencies": {
+    "@google/clasp": "^2.4.2"
+  }
+}
