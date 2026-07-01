@@ -94,6 +94,17 @@ npm run pull
 
 > `.clasp.json` chứa Script ID riêng của bạn nên đã được **gitignore**. Chỉ `Code.gs`, `Sidebar.html`, `appsscript.json` được đẩy lên (xem `.claspignore`).
 
+## Publish ra Google Workspace Marketplace
+
+Muốn phát hành cho nhiều người? Xem [`docs/PUBLISHING.md`](docs/PUBLISHING.md) —
+checklist đầy đủ. Nội dung kèm sẵn:
+
+- [`docs/PRIVACY.md`](docs/PRIVACY.md) — Privacy Policy (host lên domain của bạn)
+- [`docs/TERMS.md`](docs/TERMS.md) — Terms of Service
+- [`docs/STORE_LISTING.md`](docs/STORE_LISTING.md) — mô tả store listing EN/VI + justification quyền
+
+> Nhờ dùng scope tối thiểu (không phải *restricted scope*), bạn **né được kiểm định bảo mật bên thứ ba (CASA)** — chỉ cần brand verification nhẹ.
+
 ## License
 
 [MIT](LICENSE) © foyo.ai
